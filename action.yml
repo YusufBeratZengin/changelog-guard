@@ -1,0 +1,70 @@
+name: 'changelog-guard'
+description: 'Lint CHANGELOG.md files in Keep a Changelog format and enforce in CI that user-facing changes include changelog entries.'
+author: 'Yusuf Berat Zengin'
+branding:
+  icon: 'file-text'
+  color: 'blue'
+
+inputs:
+  mode:
+    description: 'Operation mode: "check-pr", "lint", or "both"'
+    required: false
+    default: 'both'
+  file:
+    description: 'Path to CHANGELOG.md'
+    required: false
+    default: 'CHANGELOG.md'
+  base:
+    description: 'Base git reference for check-pr'
+    required: false
+    default: ${{ github.base_ref || github.event.pull_request.base.sha || 'HEAD~1' }}
+  head:
+    description: 'Head git reference for check-pr'
+    required: false
+    default: ${{ github.head_ref || github.sha || 'HEAD' }}
+  user-facing:
+    description: 'Comma-separated globs identifying user-facing changes'
+    required: false
+    default: 'src/**,lib/**'
+  ignore:
+    description: 'Comma-separated globs to ignore during check-pr'
+    required: false
+    default: '**/*.test.*,**/*.spec.*,**/test/**,**/tests/**,**/*.d.ts'
+  skip-trailer:
+    description: 'Commit trailer key/value to skip check-pr'
+    required: false
+    default: 'Changelog: skip'
+  skip-labels:
+    description: 'Comma-separated PR labels that skip check-pr'
+    required: false
+    default: 'no-changelog,skip-changelog,chore,dependencies'
+  allow-empty-unreleased:
+    description: 'Allow empty Unreleased section during lint ("true" or "false")'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run changelog-guard lint
+      if: ${{ inputs.mode == 'lint' || inputs.mode == 'both' }}
+      shell: bash
+      run: |
+        ARGS="lint ${{ inputs.file }}"
+        if [ "${{ inputs.allow-empty-unreleased }}" = "true" ]; then
+          ARGS="$ARGS --allow-empty-unreleased"
+        fi
+        node "${{ github.action_path }}/bin/changelog-guard.js" $ARGS
+
+    - name: Run changelog-guard check-pr
+      if: ${{ (inputs.mode == 'check-pr' || inputs.mode == 'both') && github.event_name == 'pull_request' }}
+      shell: bash
+      run: |
+        node "${{ github.action_path }}/bin/changelog-guard.js" check-pr \
+          --file "${{ inputs.file }}" \
+          --base "${{ inputs.base }}" \
+          --head "${{ inputs.head }}" \
+          --user-facing "${{ inputs.user-facing }}" \
+          --ignore "${{ inputs.ignore }}" \
+          --skip-trailer "${{ inputs.skip-trailer }}" \
+          --skip-labels "${{ inputs.skip-labels }}"
