@@ -1,0 +1,44 @@
+{
+  "name": "changelog-guard",
+  "version": "0.1.0",
+  "description": "Lint CHANGELOG.md files in Keep a Changelog format and enforce in CI that user-facing changes include changelog entries.",
+  "keywords": [
+    "changelog",
+    "keep-a-changelog",
+    "linter",
+    "ci",
+    "git",
+    "release",
+    "semver"
+  ],
+  "homepage": "https://github.com/YusufBeratZengin/changelog-guard#readme",
+  "bugs": {
+    "url": "https://github.com/YusufBeratZengin/changelog-guard/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YusufBeratZengin/changelog-guard.git"
+  },
+  "license": "MIT",
+  "author": "Yusuf Berat Zengin",
+  "type": "module",
+  "main": "./src/index.js",
+  "bin": {
+    "changelog-guard": "./bin/changelog-guard.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "action.yml",
+    "README.md",
+    "README.tr.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "lint": "node ./bin/changelog-guard.js lint CHANGELOG.md"
+  }
+}
