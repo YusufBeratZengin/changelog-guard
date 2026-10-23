@@ -243,3 +243,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     }
   });
 });
+
+describe('check-pr with non-ASCII paths', () => {
+  test('a changed user-facing file with Turkish characters in its name is detected', async () => {
+    const dir = createTestRepo();
+    git(['checkout', '-b', 'feature'], dir);
+    fs.writeFileSync(path.join(dir, 'src', 'özel şey.js'), 'export const x = 1;\n', 'utf8');
+    git(['add', '.'], dir);
+    git(['commit', '-m', 'feat: add file'], dir);
+    try {
+      const result = await checkPullRequest({ base: 'main', head: 'HEAD', cwd: dir });
+      assert.equal(result.ok, false);
+      assert.equal(result.error, 'CHANGELOG_NOT_MODIFIED');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

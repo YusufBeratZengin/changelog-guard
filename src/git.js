@@ -42,15 +42,14 @@ export function getChangedFiles(base, head, cwd = process.cwd()) {
   let diffOut = '';
   // Try three-dot diff first, fallback to two-dot diff
   try {
-    diffOut = runGit(['diff', '--name-only', `${base}...${head}`], cwd);
+    diffOut = runGit(['diff', '--name-only', '-z', `${base}...${head}`], cwd);
   } catch {
-    diffOut = runGit(['diff', '--name-only', base, head], cwd);
+    diffOut = runGit(['diff', '--name-only', '-z', base, head], cwd);
   }
 
   if (!diffOut) return [];
   return diffOut
-    .split(/\r?\n/)
-    .map(line => line.trim())
+    .split('\0')
     .filter(Boolean);
 }
 
