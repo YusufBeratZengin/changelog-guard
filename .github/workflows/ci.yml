@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test (Node ${{ matrix.node-version }} on ${{ matrix.os }})
@@ -28,7 +35,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Lint CHANGELOG.md
-        run: node ./bin/changelog-guard.js lint CHANGELOG.md
+        run: npm run lint
 
-      - name: Run test suite
-        run: node --test test/*.test.js
+      - name: Run test suite with coverage
+        run: npm test
+
+      - name: Verify demo is up to date
+        run: |
+          npm run demo
+          git diff --exit-code -- docs/demo.svg

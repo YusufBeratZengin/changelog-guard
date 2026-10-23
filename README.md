@@ -1,208 +1,188 @@
 # changelog-guard
 
-A zero-dependency linter and CI gatekeeper for `CHANGELOG.md` files conforming to the [Keep a Changelog 1.1](https://keepachangelog.com/en/1.1.0/) specification.
+[![CI](https://github.com/YusufBeratZengin/changelog-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/YusufBeratZengin/changelog-guard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js >=20](https://img.shields.io/badge/node-%3E%3D20-339933.svg)](package.json)
+[![npm version](https://img.shields.io/npm/v/changelog-guard.svg)](https://www.npmjs.com/package/changelog-guard)
 
-## Overview
+Lint your changelog, require release notes in pull requests, and prepare releases with zero runtime dependencies.
 
-Software release notes often rot when contributors ship user-facing changes without documenting them. Full-fledged automated release managers (such as semantic-release or changesets) introduce significant configuration overhead, extra dependencies, and altered git workflows.
+[Türkçe](README.tr.md) · [Contributing](CONTRIBUTING.md) · [Report a bug](https://github.com/YusufBeratZengin/changelog-guard/issues/new/choose)
 
-`changelog-guard` provides a lightweight, focused alternative:
-1. Validates that `CHANGELOG.md` strictly follows Keep a Changelog 1.1 and Semantic Versioning 2.0.0 standards.
-2. Enforces in pull request CI that changes touching user-facing code include a documented entry under `[Unreleased]`.
-3. Automates release transitions by moving `[Unreleased]` entries to a dated version and updating comparison link references with byte-minimal edits.
+![Real CLI output: an invalid release date reported as JSON, with its rule and source location.](docs/demo.svg)
 
-## Features
+## Why
 
-- **Zero Runtime Dependencies**: Written entirely in pure modern Node.js standard libraries.
-- **Keep a Changelog 1.1 Compliant**: Parses and validates all standard sections and change types.
-- **Strict Lint Rules**:
-  - `heading-structure`: Enforces H1 title, H2 versions, and H3 change types without invalid nesting or jumps.
-  - `unknown-change-type`: Restricts change types strictly to `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`.
-  - `non-iso-date`: Requires real calendar dates in ISO 8601 `YYYY-MM-DD` format.
-  - `versions-not-descending`: Ensures versions are ordered in strict descending order via SemVer 2.0.0 precedence.
-  - `invalid-semver`: Verifies semantic version format (`MAJOR.MINOR.PATCH[-prerelease][+build]`).
-  - `duplicate-version`: Detects duplicate version headings.
-  - `missing-link-reference`: Ensures bracketed versions have corresponding markdown reference links.
-  - `empty-section`: Flags empty change types or version blocks without content.
-  - `unreleased-missing`: Enforces presence of the `## [Unreleased]` section at the top of version history.
-- **CI Gatekeeping (`check-pr`)**:
-  - Inspects `git diff` against base branch.
-  - Identifies user-facing modifications (e.g., `src/**`, `lib/**`).
-  - Validates that additions were made to the `[Unreleased]` section.
-  - Supports commit trailers (e.g., `Changelog: skip`) and PR labels (e.g., `no-changelog`, `chore`) to bypass checks when appropriate.
-- **Release Management (`release`)**:
-  - Promotes `[Unreleased]` entries into a new dated release header.
-  - Updates repository comparison URLs and tag URLs automatically.
-  - Preserves exact newline format (CRLF or LF) and unrelated file contents.
-- **Composite GitHub Action**: Pre-packaged GitHub Action ready for workflow pipelines.
+- **One focused tool:** validate [Keep a Changelog 1.1](https://keepachangelog.com/en/1.1.0/) headings, dates, links, change types, and [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html) ordering.
+- **Release notes stay with the code:** `check-pr` requires an addition under `[Unreleased]` when selected source files change; explicit labels and commit trailers handle exceptions.
+- **Small footprint:** no runtime dependencies or required configuration file; release preparation preserves existing line endings and unrelated content.
 
-## Requirements
+## Quick start
 
-- Node.js >= 20.0.0
-- Git (for `check-pr` operations)
-
-## Installation
-
-Run directly with `npx`:
+Requires **Node.js 20+** and **Git** (`check-pr` also needs local Git history). Run from a source checkout; no install step or published npm package is needed:
 
 ```bash
-npx changelog-guard lint
+git clone https://github.com/YusufBeratZengin/changelog-guard.git
+cd changelog-guard
+node bin/changelog-guard.js --version
+node bin/changelog-guard.js lint CHANGELOG.md
 ```
 
-Or install as a development dependency:
+Expected output from the last two commands:
+
+```text
+0.1.0
+CHANGELOG is valid. No issues found in CHANGELOG.md
+```
+
+The npm badge tracks registry availability; it may show an unavailable version before the first publication. The source checkout works independently of npm publication.
+
+## Usage examples
+
+All commands below run from the repository root. Use `node bin/changelog-guard.js --help` for the full option list.
+
+### Lint
 
 ```bash
-npm install --save-dev changelog-guard
+node bin/changelog-guard.js lint
+node bin/changelog-guard.js lint docs/CHANGELOG.md
+node bin/changelog-guard.js lint --allow-empty-unreleased
+node bin/changelog-guard.js lint --no-require-unreleased
+node bin/changelog-guard.js lint --check-orphans
 ```
 
-## CLI Usage
-
-### 1. `lint`
-
-Checks `CHANGELOG.md` for syntax and structural conformance.
+Reproduce the demo using the intentionally invalid test fixture. This command exits **1** and emits a `non-iso-date` diagnostic with its line and column:
 
 ```bash
-# Lint default CHANGELOG.md in current directory
-changelog-guard lint
-
-# Lint specific file
-changelog-guard lint docs/CHANGELOG.md
-
-# Output results as JSON
-changelog-guard lint --format json
-
-# Allow an empty [Unreleased] section (e.g. immediately after a release)
-changelog-guard lint --allow-empty-unreleased
-
-# Disable check for missing [Unreleased] section
-changelog-guard lint --no-require-unreleased
+node bin/changelog-guard.js lint test/fixtures/invalid-date-changelog.md --format json
 ```
 
-### 2. `check-pr`
+Lint rules: `heading-structure`, `unknown-change-type`, `non-iso-date`, `versions-not-descending`, `invalid-semver`, `duplicate-version`, `missing-link-reference`, `empty-section`, and `unreleased-missing`. Optional `orphan-link-reference` diagnostics are warnings.
 
-Verifies that pull requests modifying user-facing code also modify the `[Unreleased]` section.
+### Check a pull request
+
+Compare committed changes against a locally available base ref:
 
 ```bash
-# Basic check against origin/main
-changelog-guard check-pr --base origin/main
-
-# Custom user-facing globs and ignored files
-changelog-guard check-pr \
-  --base origin/main \
-  --head HEAD \
-  --user-facing "src/**,lib/**,packages/**" \
-  --ignore "**/*.test.js,**/*.spec.ts"
-
-# Custom skip trailer or skip labels
-changelog-guard check-pr \
-  --base origin/main \
-  --skip-trailer "Changelog: skip" \
-  --skip-labels "no-changelog,skip-changelog,dependencies"
+node bin/changelog-guard.js check-pr --base origin/main
+node bin/changelog-guard.js check-pr --base origin/main --head HEAD --user-facing "src/**,lib/**,packages/**" --ignore "**/*.test.js,**/*.spec.ts"
 ```
 
-#### Skipping the Check
+For an intentional exception, use a commit message body containing `Changelog: skip`, a message tag such as `[skip changelog]`, or a configured PR label. Labels are read automatically from the GitHub event payload; outside Actions, pass `--labels no-changelog`.
 
-If a pull request does not require a changelog entry (such as internal refactoring or chore work):
+### Prepare a release
 
-- **Commit Trailer**: Include `Changelog: skip` in the commit message body:
-  ```
-  refactor: restructure internal parser loop
-
-  Changelog: skip
-  ```
-- **Commit Message Tag**: Include `[skip changelog]` anywhere in the commit subject or body.
-- **PR Labels**: Attach a label configured in `--skip-labels` (default: `no-changelog`, `skip-changelog`, `chore`, `dependencies`). When executed inside GitHub Actions, labels are detected automatically from the event payload.
-
-### 3. `release`
-
-Cuts a new release by moving `[Unreleased]` items under a new version heading and updating footer links.
+Preview first; omit `--dry-run` to write the file:
 
 ```bash
-# Release version 1.1.0 with today's date
-changelog-guard release 1.1.0
-
-# Release with a specific date
-changelog-guard release 1.1.0 --date 2026-10-22
-
-# Preview modifications without writing to disk
-changelog-guard release 1.1.0 --dry-run
+node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
 ```
 
-### 4. `init`
+`release` moves entries from `[Unreleased]` to a dated version and updates comparison links. It edits the changelog only; tagging and publishing are separate maintainer steps.
 
-Creates a clean, valid template `CHANGELOG.md` in the current working directory.
+### Create a changelog
 
 ```bash
-changelog-guard init
+node bin/changelog-guard.js init docs/CHANGELOG.md
 ```
 
-## GitHub Action
+The parent directory must already exist. `init` refuses to overwrite an existing file.
 
-You can integrate `changelog-guard` directly into your GitHub Actions workflow:
+### GitHub Action
 
 ```yaml
-name: Changelog Enforcement
-
+name: Changelog
 on:
   pull_request:
     branches: [main]
-
+permissions:
+  contents: read
 jobs:
   changelog:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Verify Changelog
-        uses: YusufBeratZengin/changelog-guard@v1
+      - uses: actions/setup-node@v4
         with:
-          mode: 'both' # 'check-pr', 'lint', or 'both'
-          base: ${{ github.base_ref }}
-          head: ${{ github.head_ref }}
+          node-version: '22'
+      - uses: YusufBeratZengin/changelog-guard@main
+        with:
+          mode: both
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
 ```
 
-### Action Inputs
+This example uses `main` so it does not depend on a release tag. Pin the action to a reviewed commit for reproducible builds. Fetch the base and head history, and set up Node.js before the composite action.
 
-| Input                    | Description                                                   | Default                                         |
-| ------------------------ | ------------------------------------------------------------- | ----------------------------------------------- |
-| `mode`                   | Execution mode (`check-pr`, `lint`, or `both`)               | `both`                                          |
-| `file`                   | Path to the changelog file                                    | `CHANGELOG.md`                                  |
-| `base`                   | Git base reference for diff comparison                        | `${{ github.base_ref }}`                        |
-| `head`                   | Git head reference for diff comparison                        | `${{ github.head_ref }}`                        |
-| `user-facing`            | Comma-separated globs matching user-facing code                | `src/**,lib/**`                                 |
-| `ignore`                 | Comma-separated globs to ignore                              | `**/*.test.*,**/*.spec.*,**/test/**,**/*.d.ts`  |
-| `skip-trailer`           | Commit trailer key/value to bypass check                      | `Changelog: skip`                               |
-| `skip-labels`            | Comma-separated PR labels that bypass check                   | `no-changelog,skip-changelog,chore`             |
-| `allow-empty-unreleased` | Permit an empty `[Unreleased]` section                        | `false`                                         |
+### JavaScript API
 
-## Programmatic API
-
-`changelog-guard` exports all underlying functionality as an ES module:
+The same operations are available as ES modules in a source checkout:
 
 ```javascript
-import {
-  parseChangelog,
-  lintChangelog,
-  checkPullRequest,
-  executeRelease,
-  semver,
-  glob
-} from 'changelog-guard';
+import { readFileSync } from 'node:fs';
+import { lintChangelog, executeRelease } from './src/index.js';
 
-// Lint changelog text
+const content = readFileSync('CHANGELOG.md', 'utf8');
 const result = lintChangelog(content);
-if (!result.valid) {
-  console.error(result.diagnostics);
-}
+console.log(result.valid, result.diagnostics);
 
-// Cut a release programmatically
-const release = executeRelease(content, '1.2.0', { date: '2026-10-22' });
-console.log(release.content);
+const preview = executeRelease(content, '0.2.0', { date: '2026-10-23' });
+console.log(preview.content); // Returns text; does not write a file.
 ```
+
+The entry point also exports the parser, file-based release helper, formatters, and `semver` and `glob` utilities. See [src/index.js](src/index.js) for the full export list.
+
+## Configuration
+
+Configure the CLI with flags; there is no configuration file.
+
+| Command | Option | Default / behavior |
+| --- | --- | --- |
+| `lint` | `[file]` or `--file` | `CHANGELOG.md` |
+| `lint` | `--format` | `stylish`; use `json` for automation |
+| `lint` | `--allow-empty-unreleased` | Off; allow an empty version block after release |
+| `lint` | `--no-require-unreleased` | Off; omit the requirement for `[Unreleased]` |
+| `lint` | `--check-orphans` | Off; warn about unused version link references |
+| `check-pr` | `--base` / `--head` | Required base / `HEAD` |
+| `check-pr` | `--file` | `CHANGELOG.md` |
+| `check-pr` | `--user-facing` | `src/**,lib/**` |
+| `check-pr` | `--ignore` | `**/*.test.*,**/*.spec.*,**/test/**,**/tests/**,**/*.d.ts,**/*.map` |
+| `check-pr` | `--skip-trailer` | `Changelog: skip` |
+| `check-pr` | `--skip-labels` | `no-changelog,skip-changelog,chore,dependencies` |
+| `check-pr` | `--labels` | `PR_LABELS`, then labels from `GITHUB_EVENT_PATH` |
+| `release` | `--file` / `--date` | `CHANGELOG.md` / today's local date (`YYYY-MM-DD`) |
+| `release` | `--dry-run` | Off; print the updated file without writing |
+
+The Action accepts `mode` (`both`, `lint`, or `check-pr`), `file`, `base`, `head`, `user-facing`, `ignore`, `skip-trailer`, `skip-labels`, and `allow-empty-unreleased`. See [action.yml](action.yml) for exact defaults; its ignore list omits `**/*.map`. `check-pr` runs only on `pull_request` events in the composite action.
+
+## FAQ / Limitations
+
+**What do exit codes mean?** Lint errors, failed PR checks, and command failures exit `1`; successful checks and explicit skips exit `0`. Orphan-link warnings alone do not fail lint.
+
+**Can `[Unreleased]` be empty?** Use `--allow-empty-unreleased` after a release. Empty `### Added` or other change-type headings are still errors; remove unused headings.
+
+**Does `check-pr` understand my changes?** It matches file globs and looks for new bullet text or changed prose under `[Unreleased]`. It does not assess whether a note accurately describes the code. It compares committed Git refs and can read the working-tree changelog; use a clean checkout in CI.
+
+**What glob syntax is supported?** `*`, `**`, `?`, and simple brace expansion in the API. CLI file lists are comma-separated; use `src/**,lib/**` rather than braces containing commas. Use `--ignore` for exclusions. This is a small matcher, not a complete shell or gitignore implementation.
+
+**Does release preparation validate every date?** `lint` checks real calendar dates. `release --date` checks the `YYYY-MM-DD` shape; lint the result too. Common comparison URLs are updated, but review custom hosting URLs with `--dry-run`.
+
+**Do I need a token or external service?** The CLI runs locally. CI coverage uses Node's built-in test runner; there is no coverage upload service to configure.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [SECURITY.md](SECURITY.md) for vulnerability reporting. From a checkout:
+
+```bash
+npm test
+npm run lint
+npm run demo
+```
+
+`npm test` prints line, branch, and function coverage. Tests include temporary Git repositories, so Git must be installed. The JavaScript project currently has no separate typecheck command. Keep both READMEs aligned; regenerate [docs/demo.svg](docs/demo.svg) with [scripts/make-demo.mjs](scripts/make-demo.mjs) when its command or output changes.
 
 ## License
 
-MIT - Copyright (c) 2026 Yusuf Berat Zengin. See [LICENSE](LICENSE) for details.
+[MIT](LICENSE).

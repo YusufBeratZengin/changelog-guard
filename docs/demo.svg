@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="484" viewBox="0 0 1000 484" role="img" aria-labelledby="title desc">
+  <title id="title">changelog-guard catches an invalid release date</title>
+  <desc id="desc">Real JSON output from linting the invalid-date fixture. The non-iso-date diagnostic includes its line, column, and severity. This example exits with code 1.</desc>
+  <rect width="1000" height="484" rx="14" fill="#0d1420"/>
+  <path d="M14 0h972a14 14 0 0 1 14 14v30H0V14A14 14 0 0 1 14 0" fill="#1c2636"/>
+  <circle cx="24" cy="22" r="6" fill="#ff6b6b"/>
+  <circle cx="44" cy="22" r="6" fill="#f9c74f"/>
+  <circle cx="64" cy="22" r="6" fill="#5fd793"/>
+  <text x="500" y="27" text-anchor="middle" fill="#9aaac1" font-family="monospace" font-size="13">changelog-guard · lint</text>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" xml:space="preserve">
+    <text x="28" y="78" fill="#7ee7b3">$ node bin/changelog-guard.js lint test/fixtures/invalid-date-changelog.md --format json</text>
+    <text x="28" y="100" fill="#dce5f2"></text>
+    <text x="28" y="122" fill="#dce5f2">{</text>
+    <text x="28" y="144" fill="#dce5f2">  &quot;file&quot;: &quot;test/fixtures/invalid-date-changelog.md&quot;,</text>
+    <text x="28" y="166" fill="#dce5f2">  &quot;valid&quot;: false,</text>
+    <text x="28" y="188" fill="#dce5f2">  &quot;errorCount&quot;: 1,</text>
+    <text x="28" y="210" fill="#dce5f2">  &quot;warningCount&quot;: 0,</text>
+    <text x="28" y="232" fill="#dce5f2">  &quot;diagnostics&quot;: [</text>
+    <text x="28" y="254" fill="#dce5f2">    {</text>
+    <text x="28" y="276" fill="#dce5f2">      &quot;rule&quot;: &quot;non-iso-date&quot;,</text>
+    <text x="28" y="298" fill="#dce5f2">      &quot;message&quot;: &quot;Version \&quot;1.0.0\&quot; has invalid date \&quot;22/10/2026\&quot;. Expected ISO 8601 format YYYY-M</text>
+    <text x="28" y="320" fill="#dce5f2">M-DD (e.g., 2026-10-22).&quot;,</text>
+    <text x="28" y="342" fill="#dce5f2">      &quot;line&quot;: 8,</text>
+    <text x="28" y="364" fill="#dce5f2">      &quot;column&quot;: 1,</text>
+    <text x="28" y="386" fill="#dce5f2">      &quot;severity&quot;: &quot;error&quot;</text>
+    <text x="28" y="408" fill="#dce5f2">    }</text>
+    <text x="28" y="430" fill="#dce5f2">  ]</text>
+    <text x="28" y="452" fill="#dce5f2">}</text>
+  </g>
+</svg>

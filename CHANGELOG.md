@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Ongoing feature planning for additional output reporters.
+- Reproducible terminal SVG demo and English/Turkish quick starts, configuration, and FAQ.
+- Built-in Node.js test coverage reporting and regression tests for validation edge cases.
+- Weekly Dependabot updates, CodeQL scanning, and issue and pull request templates.
 
-## [0.1.0] - 2026-10-22
+## [0.1.0] - 2026-10-23
 
 ### Added
 - Core AST parser conforming to Keep a Changelog 1.1 specification.

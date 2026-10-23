@@ -38,7 +38,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "test": "node --test test/*.test.js",
-    "lint": "node ./bin/changelog-guard.js lint CHANGELOG.md"
+    "test": "node --test --experimental-test-coverage",
+    "lint": "node ./bin/changelog-guard.js lint CHANGELOG.md",
+    "demo": "node bin/changelog-guard.js lint test/fixtures/invalid-date-changelog.md --format json | node scripts/make-demo.mjs"
   }
 }

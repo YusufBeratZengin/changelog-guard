@@ -1,194 +1,188 @@
 # changelog-guard
 
-[Keep a Changelog 1.1](https://keepachangelog.com/en/1.1.0/) standardına uygun `CHANGELOG.md` dosyalarını denetleyen ve CI ortamlarında kullanıcıyı ilgilendiren değişikliklerin sürüm notu içermesini zorunlu kılan, sıfır bağımlılıklı araç seti.
+[![CI](https://github.com/YusufBeratZengin/changelog-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/YusufBeratZengin/changelog-guard/actions/workflows/ci.yml)
+[![Lisans: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js >=20](https://img.shields.io/badge/node-%3E%3D20-339933.svg)](package.json)
+[![npm sürümü](https://img.shields.io/npm/v/changelog-guard.svg)](https://www.npmjs.com/package/changelog-guard)
 
-## Genel Bakış
+Changelog dosyanızı denetleyin, çekme isteklerinde sürüm notu arayın ve çalışma zamanı bağımlılığı olmadan sürüm hazırlayın.
 
-Yazılım projelerinde katkıcılar kullanıcıyı etkileyen değişiklikler yaptığında sürüm notları sıklıkla güncellenmez ve zamanla eskir. semantic-release veya changesets gibi kapsamlı yayın araçları ise ek yapılandırma yükü, harici bağımlılıklar ve farklı git iş akışları gerektirir.
+[English](README.md) · [Katkı rehberi](CONTRIBUTING.md) · [Hata bildir](https://github.com/YusufBeratZengin/changelog-guard/issues/new/choose)
 
-`changelog-guard` bu soruna hafif ve odaklanmış bir çözüm sunar:
-1. `CHANGELOG.md` dosyasının Keep a Changelog 1.1 ve Semantic Versioning 2.0.0 kurallarına tam uyumunu denetler.
-2. Çekme isteklerinde (Pull Request) kullanıcıyı etkileyen kaynak kod değişikliklerinin `[Unreleased]` başlığı altında belgelenip belgelenmediğini doğrular.
-3. Yeni sürüm hazırlığında `[Unreleased]` maddelerini tarihli bir sürüm başlığına taşır ve karşılaştırma bağlantılarını dosya düzenini bozmadan günceller.
+![Gerçek CLI çıktısı: hatalı sürüm tarihinin kural adı ve dosya konumuyla JSON biçiminde bildirilmesi.](docs/demo.svg)
 
-## Özellikler
+## Neden?
 
-- **Sıfır Çalışma Zamanı Bağımlılığı**: Tamamen modern Node.js standart kütüphaneleriyle yazılmıştır.
-- **Keep a Changelog 1.1 Uyumluluğu**: Belirtimdeki tüm standart bölümleri ve değişiklik türlerini eksiksiz ayrıştırır ve doğrular.
-- **Kapsamlı Denetim Kuralları**:
-  - `heading-structure`: H1 başlık, H2 sürüm ve H3 değişiklik türü hiyerarşisini denetler; geçersiz başlık atlamalarını engeller.
-  - `unknown-change-type`: Değişiklik türlerini kesin olarak `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed` ve `Security` ile sınırlandırır.
-  - `non-iso-date`: Sürümlerin ISO 8601 `YYYY-AA-GG` biçiminde geçerli bir takvim tarihi içermesini şart koşar.
-  - `versions-not-descending`: Sürümlerin SemVer 2.0.0 öncelik sırasına göre azalan düzende listelendiğini doğrular.
-  - `invalid-semver`: Sürüm etiketlerinin geçerli semantik sürüm biçiminde olduğunu kontrol eder.
-  - `duplicate-version`: Yinelenen sürüm başlıklarını tespit eder.
-  - `missing-link-reference`: Köşeli parantezli sürümlerin dosya sonunda karşılık gelen bağlantı tanımlarına sahip olmasını denetler.
-  - `empty-section`: İçi boş bırakılmış değişiklik türlerini ve sürümleri işaretler.
-  - `unreleased-missing`: Sürüm geçmişinin en başında `## [Unreleased]` bölümünün bulunmasını zorunlu tutar.
-- **CI Doğrulaması (`check-pr`)**:
-  - Hedef dalla olan `git diff` farkını inceler.
-  - Kullanıcıyı ilgilendiren kod değişikliklerini (ör. `src/**`, `lib/**`) saptar.
-  - `CHANGELOG.md` dosyasının `[Unreleased]` bölümüne yeni madde eklenip eklenmediğini kontrol eder.
-  - İlgili durumlarda kontrolü atlamak için commit trailer (`Changelog: skip`) ve PR etiketlerini (`no-changelog`, `chore`) destekler.
-- **Sürüm Yönetimi (`release`)**:
-  - `[Unreleased]` maddelerini yeni tarihli bir sürüme dönüştürür.
-  - Karşılaştırma bağlantılarını ve etiket URL'lerini otomatik günceller.
-  - Satır sonu karakterlerini (CRLF veya LF) ve dosyadaki diğer tüm kısımları aynen korur.
-- **Hazır GitHub Action**: CI iş akışlarına doğrudan dahil edilebilen composite eylem.
+- **Tek işe odaklanır:** [Keep a Changelog 1.1](https://keepachangelog.com/en/1.1.0/) başlıklarını, tarihlerini, bağlantılarını ve değişiklik türlerini; [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html) sürüm sıralamasını denetler.
+- **Sürüm notları kodla birlikte ilerler:** `check-pr`, seçilen kaynak dosyalar değiştiğinde `[Unreleased]` bölümüne ekleme yapılmasını ister. İstisnalar etiket veya commit trailer ile açıkça belirtilir.
+- **Kurulumu hafiftir:** çalışma zamanı bağımlılığı ve zorunlu yapılandırma dosyası yoktur. Sürüm hazırlarken mevcut satır sonlarını ve ilgisiz içeriği korur.
 
-## Gereksinimler
+## Hızlı başlangıç
 
-- Node.js >= 20.0.0
-- Git (`check-pr` komutu için)
-
-## Kurulum
-
-`npx` ile doğrudan çalıştırılabilir:
+**Node.js 20+** ve **Git** gerekir (`check-pr` için Git geçmişi de yerelde bulunmalıdır). Kaynak kodu klonlayıp çalıştırabilirsiniz; kurulum adımı veya yayımlanmış npm paketi gerekmez:
 
 ```bash
-npx changelog-guard lint
+git clone https://github.com/YusufBeratZengin/changelog-guard.git
+cd changelog-guard
+node bin/changelog-guard.js --version
+node bin/changelog-guard.js lint CHANGELOG.md
 ```
 
-Veya projeye geliştirme bağımlılığı olarak eklenebilir:
+Son iki komutun beklenen çıktısı:
+
+```text
+0.1.0
+CHANGELOG is valid. No issues found in CHANGELOG.md
+```
+
+npm rozeti kayıt defterindeki durumu gösterir; ilk yayımdan önce sürüm bilgisi bulunamayabilir. Kaynak koddan çalıştırma, npm yayımından bağımsızdır.
+
+## Kullanım örnekleri
+
+Aşağıdaki komutları depo kökünde çalıştırın. Tüm seçenekler için `node bin/changelog-guard.js --help` komutunu kullanın.
+
+### Denetleme
 
 ```bash
-npm install --save-dev changelog-guard
+node bin/changelog-guard.js lint
+node bin/changelog-guard.js lint docs/CHANGELOG.md
+node bin/changelog-guard.js lint --allow-empty-unreleased
+node bin/changelog-guard.js lint --no-require-unreleased
+node bin/changelog-guard.js lint --check-orphans
 ```
 
-## CLI Kullanımı
-
-### 1. `lint`
-
-`CHANGELOG.md` dosyasını yapısal ve anlamsal kurallara göre denetler.
+Demoyu, bilerek hatalı hazırlanmış test dosyasıyla tekrar üretebilirsiniz. Bu komut **1** çıkış koduyla sonlanır; `non-iso-date` hatasını satır ve sütun bilgisiyle verir:
 
 ```bash
-# Geçerli dizindeki CHANGELOG.md dosyasını denetler
-changelog-guard lint
-
-# Belirli bir dosyayı denetler
-changelog-guard lint docs/CHANGELOG.md
-
-# Sonuçları JSON biçiminde verir
-changelog-guard lint --format json
-
-# Boş [Unreleased] bölümüne izin verir (ör. yeni yayından hemen sonra)
-changelog-guard lint --allow-empty-unreleased
-
-# [Unreleased] bölümü zorunluluğunu kaldırır
-changelog-guard lint --no-require-unreleased
+node bin/changelog-guard.js lint test/fixtures/invalid-date-changelog.md --format json
 ```
 
-### 2. `check-pr`
+Denetim kuralları: `heading-structure`, `unknown-change-type`, `non-iso-date`, `versions-not-descending`, `invalid-semver`, `duplicate-version`, `missing-link-reference`, `empty-section` ve `unreleased-missing`. İsteğe bağlı `orphan-link-reference` bildirimleri uyarı düzeyindedir.
 
-Çekme isteklerinde kullanıcıyı etkileyen değişikliklerin `[Unreleased]` bölümünde yer aldığını doğrular.
+### Çekme isteğini kontrol etme
+
+Commit edilmiş değişiklikleri yerelde bulunan bir temel Git referansıyla karşılaştırın:
 
 ```bash
-# origin/main dalına göre temel kontrol
-changelog-guard check-pr --base origin/main
-
-# Özel dosya desenleri ve hariç tutulan yollar
-changelog-guard check-pr \
-  --base origin/main \
-  --head HEAD \
-  --user-facing "src/**,lib/**,packages/**" \
-  --ignore "**/*.test.js,**/*.spec.ts"
-
-# Özel atlama kuralları
-changelog-guard check-pr \
-  --base origin/main \
-  --skip-trailer "Changelog: skip" \
-  --skip-labels "no-changelog,skip-changelog,dependencies"
+node bin/changelog-guard.js check-pr --base origin/main
+node bin/changelog-guard.js check-pr --base origin/main --head HEAD --user-facing "src/**,lib/**,packages/**" --ignore "**/*.test.js,**/*.spec.ts"
 ```
 
-#### Denetimi Atlama
+Bilinçli bir istisna için commit mesajının gövdesine `Changelog: skip`, mesajın içine `[skip changelog]` gibi bir işaret veya çekme isteğine yapılandırılmış bir etiket ekleyin. GitHub olay verisindeki etiketler otomatik okunur; Actions dışında `--labels no-changelog` kullanabilirsiniz.
 
-Eğer yapılan değişiklik bir sürüm notu gerektirmiyorsa (ör. dahili kod temizliği veya bağımlılık güncellemesi):
+### Sürüm hazırlama
 
-- **Commit Trailer**: Commit mesajının gövdesine `Changelog: skip` satırı ekleyin:
-  ```
-  refactor: ayrıştırıcı döngüsünü optimize et
-
-  Changelog: skip
-  ```
-- **Commit Mesajı Etiketi**: Commit başlığı veya gövdesine `[skip changelog]` ekleyin.
-- **PR Etiketleri**: PR üzerine yapılandırılmış etiketlerden birini ekleyin (varsayılan: `no-changelog`, `skip-changelog`, `chore`, `dependencies`). GitHub Actions içinde çalışırken etiketler olay verisinden otomatik algılanır.
-
-### 3. `release`
-
-`[Unreleased]` altındaki değişiklikleri yeni sürüm başlığı altına taşır ve bağlantıları günceller.
+Önce sonucu önizleyin; dosyaya yazmak için `--dry-run` seçeneğini kaldırın:
 
 ```bash
-# Günün tarihiyle 1.1.0 sürümünü yayınlar
-changelog-guard release 1.1.0
-
-# Belirli bir tarih ile yayınlar
-changelog-guard release 1.1.0 --date 2026-10-22
-
-# Dosyaya yazmadan sonucu ekranda görüntüler
-changelog-guard release 1.1.0 --dry-run
+node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
 ```
 
-### 4. `init`
+`release`, `[Unreleased]` maddelerini tarihli sürüm başlığına taşır ve karşılaştırma bağlantılarını günceller. Yalnızca changelog dosyasını düzenler; etiketleme ve paket yayımlama bakımcının ayrı adımlarıdır.
 
-Geçerli dizinde standart Keep a Changelog 1.1 şablonu oluşturur.
+### Changelog oluşturma
 
 ```bash
-changelog-guard init
+node bin/changelog-guard.js init docs/CHANGELOG.md
 ```
 
-## GitHub Action Entegrasyonu
+Üst dizin önceden bulunmalıdır. `init`, mevcut dosyanın üzerine yazmaz.
 
-İş akışlarınıza doğrudan GitHub Action olarak dahil edebilirsiniz:
+### GitHub Action
 
 ```yaml
-name: Changelog Kontrolü
-
+name: Changelog
 on:
   pull_request:
     branches: [main]
-
+permissions:
+  contents: read
 jobs:
   changelog:
     runs-on: ubuntu-latest
     steps:
-      - name: Kodu çek
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Changelog Kontrolü Yap
-        uses: YusufBeratZengin/changelog-guard@v1
+      - uses: actions/setup-node@v4
         with:
-          mode: 'both' # 'check-pr', 'lint' veya 'both'
-          base: ${{ github.base_ref }}
-          head: ${{ github.head_ref }}
+          node-version: '22'
+      - uses: YusufBeratZengin/changelog-guard@main
+        with:
+          mode: both
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
 ```
 
-## Programatik API
+Örnek, sürüm etiketine bağlı kalmamak için `main` kullanır. Tekrarlanabilir derlemeler için Action'ı incelenmiş bir commit'e sabitleyin. Temel ve karşılaştırılan commit'lerin geçmişini çekin; composite Action'dan önce Node.js kurulumunu yapın.
 
-`changelog-guard`, Node.js ES modülü olarak tüm fonksiyonlarını dışa aktarır:
+### JavaScript API
+
+Aynı işlemler kaynak koddan ES modülü olarak da kullanılabilir:
 
 ```javascript
-import {
-  parseChangelog,
-  lintChangelog,
-  checkPullRequest,
-  executeRelease,
-  semver,
-  glob
-} from 'changelog-guard';
+import { readFileSync } from 'node:fs';
+import { lintChangelog, executeRelease } from './src/index.js';
 
-// Metin içeriğini denetleme
+const content = readFileSync('CHANGELOG.md', 'utf8');
 const result = lintChangelog(content);
-if (!result.valid) {
-  console.error(result.diagnostics);
-}
+console.log(result.valid, result.diagnostics);
 
-// Sürüm oluşturma
-const release = executeRelease(content, '1.2.0', { date: '2026-10-22' });
-console.log(release.content);
+const preview = executeRelease(content, '0.2.0', { date: '2026-10-23' });
+console.log(preview.content); // Metin döndürür; dosyaya yazmaz.
 ```
+
+Giriş modülü ayrıca ayrıştırıcıyı, dosya üzerinden sürüm hazırlama işlevini, çıktı biçimlendiricilerini ve `semver` ile `glob` yardımcılarını dışa aktarır. Tam liste için [src/index.js](src/index.js) dosyasına bakın.
+
+## Yapılandırma
+
+CLI, komut seçenekleriyle yapılandırılır; ayrı yapılandırma dosyası yoktur.
+
+| Komut | Seçenek | Varsayılan / davranış |
+| --- | --- | --- |
+| `lint` | `[file]` veya `--file` | `CHANGELOG.md` |
+| `lint` | `--format` | `stylish`; otomasyon için `json` |
+| `lint` | `--allow-empty-unreleased` | Kapalı; sürüm hazırladıktan sonra boş sürüm bölümüne izin verir |
+| `lint` | `--no-require-unreleased` | Kapalı; `[Unreleased]` zorunluluğunu kaldırır |
+| `lint` | `--check-orphans` | Kapalı; kullanılmayan sürüm bağlantılarını uyarı olarak bildirir |
+| `check-pr` | `--base` / `--head` | Temel referans zorunlu / `HEAD` |
+| `check-pr` | `--file` | `CHANGELOG.md` |
+| `check-pr` | `--user-facing` | `src/**,lib/**` |
+| `check-pr` | `--ignore` | `**/*.test.*,**/*.spec.*,**/test/**,**/tests/**,**/*.d.ts,**/*.map` |
+| `check-pr` | `--skip-trailer` | `Changelog: skip` |
+| `check-pr` | `--skip-labels` | `no-changelog,skip-changelog,chore,dependencies` |
+| `check-pr` | `--labels` | Önce `PR_LABELS`, ardından `GITHUB_EVENT_PATH` içindeki etiketler |
+| `release` | `--file` / `--date` | `CHANGELOG.md` / yerel takvime göre bugün (`YYYY-MM-DD`) |
+| `release` | `--dry-run` | Kapalı; güncellenmiş dosyayı yazmadan ekrana verir |
+
+Action; `mode` (`both`, `lint` veya `check-pr`), `file`, `base`, `head`, `user-facing`, `ignore`, `skip-trailer`, `skip-labels` ve `allow-empty-unreleased` girdilerini kabul eder. Kesin varsayılanlar için [action.yml](action.yml) dosyasına bakın; Action'ın hariç tutma listesinde `**/*.map` bulunmaz. Composite Action içindeki `check-pr`, yalnızca `pull_request` olaylarında çalışır.
+
+## Sık sorulanlar / Sınırlar
+
+**Çıkış kodları ne anlama gelir?** Denetim hataları, başarısız çekme isteği kontrolleri ve komut hataları `1`; başarılı kontroller ve açıkça atlanan kontroller `0` döndürür. Tek başına kullanılmayan bağlantı uyarıları denetimi başarısız kılmaz.
+
+**`[Unreleased]` boş kalabilir mi?** Yeni sürümden sonra `--allow-empty-unreleased` kullanın. Boş `### Added` veya diğer değişiklik türü başlıkları yine hatadır; kullanılmayan başlıkları kaldırın.
+
+**`check-pr`, değişikliğin içeriğini anlar mı?** Dosya desenlerini eşleştirir; `[Unreleased]` altında yeni madde metni veya değişen açıklama arar. Notun kodu doğru anlatıp anlatmadığını değerlendirmez. Commit edilmiş Git referanslarını karşılaştırır, changelog dosyasını çalışma dizininden okuyabilir; CI'da temiz bir çalışma kopyası kullanın.
+
+**Hangi dosya desenleri desteklenir?** `*`, `**`, `?` ve API'de basit süslü parantez açılımı desteklenir. CLI listeleri virgülle ayrılır; virgül içeren süslü parantez yerine `src/**,lib/**` yazın. Hariç tutmak için `--ignore` kullanın. Eşleştirici, shell veya gitignore kurallarının tamamını uygulamaz.
+
+**Sürüm hazırlarken her tarih doğrulanır mı?** `lint`, gerçek takvim tarihlerini denetler. `release --date`, yalnızca `YYYY-MM-DD` biçimini kontrol eder; sonucu ayrıca denetleyin. Yaygın karşılaştırma bağlantıları güncellenir; özel barındırma adreslerini `--dry-run` ile gözden geçirin.
+
+**Token veya dış servis gerekir mi?** CLI yerelde çalışır. CI kapsam raporu Node'un yerleşik test çalıştırıcısını kullanır; yapılandırılacak harici kapsam servisi yoktur.
+
+## Katkıda bulunma
+
+İş akışı için [CONTRIBUTING.md](CONTRIBUTING.md), güvenlik açığı bildirimleri için [SECURITY.md](SECURITY.md) dosyasına bakın. Kaynak kodu klonladıktan sonra:
+
+```bash
+npm test
+npm run lint
+npm run demo
+```
+
+`npm test`, satır, dal ve işlev kapsamını ekrana yazar. Testlerde geçici Git depoları kullanıldığı için Git kurulu olmalıdır. JavaScript projesinde şu anda ayrı bir typecheck komutu yoktur. İki README'yi aynı yapıda tutun; demo komutu veya çıktısı değiştiğinde [scripts/make-demo.mjs](scripts/make-demo.mjs) ile [docs/demo.svg](docs/demo.svg) dosyasını yeniden üretin.
 
 ## Lisans
 
-MIT - Copyright (c) 2026 Yusuf Berat Zengin. Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
+[MIT](LICENSE).

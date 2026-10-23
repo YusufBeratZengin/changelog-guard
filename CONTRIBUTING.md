@@ -8,7 +8,7 @@ All contributors and participants are expected to maintain a professional, respe
 
 ## Development Setup
 
-`changelog-guard` is built with Node.js (>=20) and has zero runtime or development dependencies. All functionality relies on modern Node.js standard libraries and built-in runners.
+`changelog-guard` is built with Node.js (>=20) and has zero runtime or development dependencies. Git is required for integration tests. All functionality relies on Node.js standard libraries and built-in runners.
 
 1. Clone the repository:
    ```bash
@@ -21,7 +21,7 @@ All contributors and participants are expected to maintain a professional, respe
    node -v
    ```
 
-3. Run the test suite:
+3. Run the test suite with line, branch, and function coverage printed to the terminal:
    ```bash
    npm test
    ```
@@ -30,6 +30,16 @@ All contributors and participants are expected to maintain a professional, respe
    ```bash
    npm run lint
    ```
+
+There is currently no separate typecheck command; the source is JavaScript. Add tests for meaningful uncovered branches and aim for at least 85% source line coverage. Coverage does not require an account or upload service.
+
+Keep `README.md` and `README.tr.md` structurally aligned. If the demo command, fixture, or output changes, regenerate the static SVG:
+
+```bash
+npm run demo
+```
+
+The demo fixture intentionally fails lint with exit code 1. Its JSON output is piped to `scripts/make-demo.mjs`, which validates the diagnostic and renders it as `docs/demo.svg`. CI checks that regeneration leaves the image unchanged.
 
 ## Commit Message Guidelines
 
