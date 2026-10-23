@@ -18,7 +18,7 @@ export const STANDARD_CHANGE_TYPES = [
  * @returns {ChangelogAST}
  */
 export function parseChangelog(content) {
-  const lines = content.split(/\r?\n/);
+  const lines = content.replace(/^﻿/, '').split(/\r?\n/);
   const headings = [];
   const versions = [];
   const linkReferences = new Map();

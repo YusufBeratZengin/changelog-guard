@@ -167,7 +167,7 @@ The Action accepts `mode` (`both`, `lint`, or `check-pr`), `file`, `base`, `head
 
 **What glob syntax is supported?** `*`, `**`, `?`, and simple brace expansion in the API. CLI file lists are comma-separated; use `src/**,lib/**` rather than braces containing commas. Use `--ignore` for exclusions. This is a small matcher, not a complete shell or gitignore implementation.
 
-**Does release preparation validate every date?** `lint` checks real calendar dates. `release --date` checks the `YYYY-MM-DD` shape; lint the result too. Common comparison URLs are updated, but review custom hosting URLs with `--dry-run`.
+**Does release preparation validate every date?** `lint` checks real calendar dates. `release --date` rejects impossible dates such as `2026-13-45` too. Common comparison URLs are updated, but review custom hosting URLs with `--dry-run`.
 
 **Do I need a token or external service?** The CLI runs locally. CI coverage uses Node's built-in test runner; there is no coverage upload service to configure.
 

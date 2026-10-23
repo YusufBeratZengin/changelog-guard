@@ -167,7 +167,7 @@ Action; `mode` (`both`, `lint` veya `check-pr`), `file`, `base`, `head`, `user-f
 
 **Hangi dosya desenleri desteklenir?** `*`, `**`, `?` ve API'de basit süslü parantez açılımı desteklenir. CLI listeleri virgülle ayrılır; virgül içeren süslü parantez yerine `src/**,lib/**` yazın. Hariç tutmak için `--ignore` kullanın. Eşleştirici, shell veya gitignore kurallarının tamamını uygulamaz.
 
-**Sürüm hazırlarken her tarih doğrulanır mı?** `lint`, gerçek takvim tarihlerini denetler. `release --date`, yalnızca `YYYY-MM-DD` biçimini kontrol eder; sonucu ayrıca denetleyin. Yaygın karşılaştırma bağlantıları güncellenir; özel barındırma adreslerini `--dry-run` ile gözden geçirin.
+**Sürüm hazırlarken her tarih doğrulanır mı?** `lint`, gerçek takvim tarihlerini denetler. `release --date` da `2026-13-45` gibi geçersiz tarihleri reddeder. Yaygın karşılaştırma bağlantıları güncellenir; özel barındırma adreslerini `--dry-run` ile gözden geçirin.
 
 **Token veya dış servis gerekir mi?** CLI yerelde çalışır. CI kapsam raporu Node'un yerleşik test çalıştırıcısını kullanır; yapılandırılacak harici kapsam servisi yoktur.
 

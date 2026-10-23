@@ -13,7 +13,7 @@ const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
  * @param {string} dateStr
  * @returns {boolean}
  */
-function isValidIsoDate(dateStr) {
+export function isValidIsoDate(dateStr) {
   if (!dateStr || typeof dateStr !== 'string') return false;
   const match = dateStr.match(ISO_DATE_REGEX);
   if (!match) return false;

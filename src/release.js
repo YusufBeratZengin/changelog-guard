@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseChangelog } from './parser.js';
 import * as semver from './semver.js';
+import { isValidIsoDate } from './linter.js';
 
 /**
  * Detects the newline style used in the text ('\r\n' or '\n').
@@ -47,8 +48,8 @@ export function executeRelease(content, rawVersion, options = {}) {
   }
 
   const releaseDate = options.date || getTodayDate();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
-    throw new Error(`Invalid date "${releaseDate}". Expected ISO format YYYY-MM-DD.`);
+  if (!isValidIsoDate(releaseDate)) {
+    throw new Error(`Invalid date "${releaseDate}". Expected a real calendar date in ISO format YYYY-MM-DD.`);
   }
 
   const ast = parseChangelog(content);

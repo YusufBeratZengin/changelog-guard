@@ -104,3 +104,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     assert.equal(res.content.includes('\r\n'), true);
   });
 });
+
+describe('release and lint edge cases', () => {
+  const base = '# Changelog\n\n## [Unreleased]\n\n### Added\n- x\n';
+
+  test('release rejects impossible calendar dates', () => {
+    for (const date of ['2026-13-45', '2026-02-30', '2026-00-10']) {
+      assert.throws(() => executeRelease(base, '1.0.0', { date }), /Invalid date/);
+    }
+    assert.doesNotThrow(() => executeRelease(base, '1.0.0', { date: '2024-02-29' }));
+  });
+
+  test('a UTF-8 BOM before the first heading is not a lint error and survives release', () => {
+    const bom = '\uFEFF' + base.replace(/\n/g, '\r\n');
+    const headingErrors = (c) => lintChangelog(c).diagnostics.filter((d) => d.rule === 'heading-structure');
+    assert.deepEqual(headingErrors(bom), []);
+    const res = executeRelease(bom, '1.0.0', { date: '2026-10-22' });
+    assert.ok(res.content.startsWith('\uFEFF# Changelog'));
+    assert.deepEqual(headingErrors(res.content), []);
+  });
+});
