@@ -17,7 +17,16 @@ const escapeXml = value => value.replace(/[<>&"']/g, character => ({
 
 // Wrap terminal rows without changing the captured text. No timestamps or paths.
 const columns = 100;
-const wrap = line => line.match(new RegExp(`.{1,${columns}}`, 'g')) || [''];
+const wrap = line => {
+  const parts = [];
+  while (line.length > columns) {
+    const space = line.lastIndexOf(' ', columns - 1);
+    const end = space > 0 ? space + 1 : columns;
+    parts.push(line.slice(0, end));
+    line = line.slice(end);
+  }
+  return [...parts, line];
+};
 const rows = [`$ ${command}`, '', ...output.split('\n')].flatMap(wrap);
 const lineHeight = 22;
 const height = 88 + rows.length * lineHeight;
@@ -41,6 +50,16 @@ ${text}
 `;
 
 const target = new URL('../docs/demo.svg', import.meta.url);
-fs.mkdirSync(new URL('../docs/', import.meta.url), { recursive: true });
-fs.writeFileSync(target, svg, 'utf8');
-console.log(`Generated docs/demo.svg from ${output.split('\n').length} lines of CLI output.`);
+if (process.argv.includes('--check')) {
+  const existing = fs.existsSync(target) ? fs.readFileSync(target, 'utf8').replace(/\r\n/g, '\n') : '';
+  if (existing !== svg) {
+    console.error('docs/demo.svg is out of date. Run npm run demo.');
+    process.exitCode = 1;
+  } else {
+    console.log('docs/demo.svg matches the real CLI output.');
+  }
+} else {
+  fs.mkdirSync(new URL('../docs/', import.meta.url), { recursive: true });
+  fs.writeFileSync(target, svg, 'utf8');
+  console.log(`Generated docs/demo.svg from ${output.split('\n').length} lines of CLI output.`);
+}

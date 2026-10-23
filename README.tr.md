@@ -179,9 +179,16 @@ Action; `mode` (`both`, `lint` veya `check-pr`), `file`, `base`, `head`, `user-f
 npm test
 npm run lint
 npm run demo
+npm run demo:check
 ```
 
-`npm test`, satır, dal ve işlev kapsamını ekrana yazar. Testlerde geçici Git depoları kullanıldığı için Git kurulu olmalıdır. JavaScript projesinde şu anda ayrı bir typecheck komutu yoktur. İki README'yi aynı yapıda tutun; demo komutu veya çıktısı değiştiğinde [scripts/make-demo.mjs](scripts/make-demo.mjs) ile [docs/demo.svg](docs/demo.svg) dosyasını yeniden üretin.
+`npm test`, satır, dal ve işlev kapsamını ekrana yazar. CI, Linux ve Windows üzerinde Node.js 22 ve 24 ile çalışır; `src/**` için en az %85 satır kapsamı ister. CI kapsam kontrolünü Node.js 22.8+ ile yerelde çalıştırabilirsiniz:
+
+```bash
+npm test -- --test-coverage-include=src/** --test-coverage-lines=85
+```
+
+Testlerde geçici Git depoları kullanıldığı için Git kurulu olmalıdır. JavaScript projesinde şu anda ayrı bir typecheck komutu yoktur. İki README'yi aynı yapıda tutun; demo komutu veya çıktısı değiştiğinde [scripts/make-demo.mjs](scripts/make-demo.mjs) ile [docs/demo.svg](docs/demo.svg) dosyasını yeniden üretin. `npm run demo:check`, görseli dosyaya yazmadan doğrular.
 
 ## Lisans
 

@@ -33,13 +33,20 @@ All contributors and participants are expected to maintain a professional, respe
 
 There is currently no separate typecheck command; the source is JavaScript. Add tests for meaningful uncovered branches and aim for at least 85% source line coverage. Coverage does not require an account or upload service.
 
+CI tests Node.js 22 and 24 on Linux and Windows and enforces at least 85% line coverage for `src/**`. Run the same check with Node.js 22.8+:
+
+```bash
+npm test -- --test-coverage-include=src/** --test-coverage-lines=85
+```
+
 Keep `README.md` and `README.tr.md` structurally aligned. If the demo command, fixture, or output changes, regenerate the static SVG:
 
 ```bash
 npm run demo
+npm run demo:check
 ```
 
-The demo fixture intentionally fails lint with exit code 1. Its JSON output is piped to `scripts/make-demo.mjs`, which validates the diagnostic and renders it as `docs/demo.svg`. CI checks that regeneration leaves the image unchanged.
+The demo fixture intentionally fails lint with exit code 1. Its JSON output is piped to `scripts/make-demo.mjs`, which validates the diagnostic and renders it as `docs/demo.svg`. `npm run demo:check` compares the current image with freshly captured output without writing a file; CI runs this check too.
 
 ## Commit Message Guidelines
 

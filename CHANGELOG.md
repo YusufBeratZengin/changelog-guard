@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reproducible terminal SVG demo and English/Turkish quick starts, configuration, and FAQ.
 - Built-in Node.js test coverage reporting and regression tests for validation edge cases.
 - Weekly Dependabot updates, CodeQL scanning, and issue and pull request templates.
+- Read-only demo verification and an enforced 85% source line coverage floor in the Node.js 22/24 CI matrix.
 
 ## [0.1.0] - 2026-10-23
 

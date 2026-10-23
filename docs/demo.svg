@@ -18,8 +18,8 @@
     <text x="28" y="232" fill="#dce5f2">  &quot;diagnostics&quot;: [</text>
     <text x="28" y="254" fill="#dce5f2">    {</text>
     <text x="28" y="276" fill="#dce5f2">      &quot;rule&quot;: &quot;non-iso-date&quot;,</text>
-    <text x="28" y="298" fill="#dce5f2">      &quot;message&quot;: &quot;Version \&quot;1.0.0\&quot; has invalid date \&quot;22/10/2026\&quot;. Expected ISO 8601 format YYYY-M</text>
-    <text x="28" y="320" fill="#dce5f2">M-DD (e.g., 2026-10-22).&quot;,</text>
+    <text x="28" y="298" fill="#dce5f2">      &quot;message&quot;: &quot;Version \&quot;1.0.0\&quot; has invalid date \&quot;22/10/2026\&quot;. Expected ISO 8601 format </text>
+    <text x="28" y="320" fill="#dce5f2">YYYY-MM-DD (e.g., 2026-10-22).&quot;,</text>
     <text x="28" y="342" fill="#dce5f2">      &quot;line&quot;: 8,</text>
     <text x="28" y="364" fill="#dce5f2">      &quot;column&quot;: 1,</text>
     <text x="28" y="386" fill="#dce5f2">      &quot;severity&quot;: &quot;error&quot;</text>

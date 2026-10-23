@@ -179,9 +179,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and [SECURITY.md](SECURI
 npm test
 npm run lint
 npm run demo
+npm run demo:check
 ```
 
-`npm test` prints line, branch, and function coverage. Tests include temporary Git repositories, so Git must be installed. The JavaScript project currently has no separate typecheck command. Keep both READMEs aligned; regenerate [docs/demo.svg](docs/demo.svg) with [scripts/make-demo.mjs](scripts/make-demo.mjs) when its command or output changes.
+`npm test` prints line, branch, and function coverage. CI runs on Linux and Windows with Node.js 22 and 24, and requires at least 85% line coverage for `src/**`. Reproduce the CI coverage check with Node.js 22.8+:
+
+```bash
+npm test -- --test-coverage-include=src/** --test-coverage-lines=85
+```
+
+Tests include temporary Git repositories, so Git must be installed. The JavaScript project currently has no separate typecheck command. Keep both READMEs aligned; regenerate [docs/demo.svg](docs/demo.svg) with [scripts/make-demo.mjs](scripts/make-demo.mjs) when its command or output changes. `npm run demo:check` verifies the image without writing it.
 
 ## License
 
