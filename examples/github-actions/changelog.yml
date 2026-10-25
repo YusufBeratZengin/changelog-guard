@@ -1,0 +1,42 @@
+# Example GitHub Actions workflow integrating changelog-guard
+# Place this file in .github/workflows/changelog.yml
+
+name: Changelog
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    name: Verify Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full Git history so check-pr can compare commits
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run changelog-guard
+        uses: YusufBeratZengin/changelog-guard@main
+        with:
+          # "both" runs lint on all events, and check-pr on pull_request events
+          mode: both
+          file: 'CHANGELOG.md'
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          user-facing: 'src/**,lib/**'
+          ignore: '**/*.test.*,**/*.spec.*,**/test/**,**/tests/**,**/*.d.ts'
+          skip-trailer: 'Changelog: skip'
+          skip-labels: 'no-changelog,skip-changelog,chore,dependencies'

@@ -1,0 +1,15 @@
+{
+  "name": "example-scripts-integration",
+  "description": "Example scripts and Git hooks configuration for projects adopting changelog-guard.",
+  "scripts": {
+    "lint:changelog": "changelog-guard lint",
+    "lint:changelog:json": "changelog-guard lint --format json",
+    "check:pr": "changelog-guard check-pr --base origin/main",
+    "release:preview": "changelog-guard release 1.0.0 --dry-run",
+    "version": "changelog-guard release $npm_package_version && git add CHANGELOG.md"
+  },
+  "hooks": {
+    "pre-commit": "changelog-guard lint",
+    "pre-push": "changelog-guard check-pr --base origin/main"
+  }
+}

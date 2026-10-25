@@ -48,6 +48,15 @@ npm run demo:check
 
 The demo fixture intentionally fails lint with exit code 1. Its JSON output is piped to `scripts/make-demo.mjs`, which validates the diagnostic and renders it as `docs/demo.svg`. `npm run demo:check` compares the current image with freshly captured output without writing a file; CI runs this check too.
 
+## AI Assistance Policy
+
+Contributions generated or assisted by AI tools are welcome provided that:
+
+1. The author thoroughly understands, verifies, and takes full responsibility for all submitted code and documentation.
+2. The pull request meets all test, lint, and coverage requirements (>=85% source line coverage floor).
+3. No proprietary, unlicensed, confidential, or sensitive material is introduced.
+4. Commit messages and pull request descriptions clearly explain what changed and why, adhering to Conventional Commits.
+
 ## Commit Message Guidelines
 
 This project strictly adheres to [Conventional Commits](https://www.conventionalcommits.org/):

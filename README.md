@@ -45,10 +45,16 @@ All commands below run from the repository root. Use `node bin/changelog-guard.j
 
 ```bash
 node bin/changelog-guard.js lint
-node bin/changelog-guard.js lint docs/CHANGELOG.md
+node bin/changelog-guard.js lint examples/sample-CHANGELOG.md
 node bin/changelog-guard.js lint --allow-empty-unreleased
 node bin/changelog-guard.js lint --no-require-unreleased
 node bin/changelog-guard.js lint --check-orphans
+```
+
+Expected output when valid:
+
+```text
+CHANGELOG is valid. No issues found in CHANGELOG.md
 ```
 
 Reproduce the demo using the intentionally invalid test fixture. This command exits **1** and emits a `non-iso-date` diagnostic with its line and column:
@@ -68,14 +74,42 @@ node bin/changelog-guard.js check-pr --base origin/main
 node bin/changelog-guard.js check-pr --base origin/main --head HEAD --user-facing "src/**,lib/**,packages/**" --ignore "**/*.test.js,**/*.spec.ts"
 ```
 
-For an intentional exception, use a commit message body containing `Changelog: skip`, a message tag such as `[skip changelog]`, or a configured PR label. Labels are read automatically from the GitHub event payload; outside Actions, pass `--labels no-changelog`.
+Expected output when no user-facing changes were made:
+
+```text
+[changelog-guard] PASSED: No user-facing files were modified.
+```
+
+Expected output when changelog entry was added:
+
+```text
+[changelog-guard] PASSED: Changelog check passed: 1 entry/entries added to [Unreleased].
+```
+
+For an intentional exception, use a commit message body containing `Changelog: skip`, a message tag such as `[skip changelog]`, or a configured PR label:
+
+```text
+[changelog-guard] Found commit trailer "Changelog: skip"
+```
+
+Labels are read automatically from the GitHub event payload; outside Actions, pass `--labels no-changelog`.
 
 ### Prepare a release
 
-Preview first; omit `--dry-run` to write the file:
+Preview first using `--dry-run`; omit `--dry-run` to write the updated changelog to disk:
 
 ```bash
+# Preview changes (dry-run):
 node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
+
+# Apply release to file:
+node bin/changelog-guard.js release 0.2.0 --date 2026-10-23
+```
+
+Output when written to disk:
+
+```text
+Released version [0.2.0] (2026-10-23) in CHANGELOG.md
 ```
 
 `release` moves entries from `[Unreleased]` to a dated version and updates comparison links. It edits the changelog only; tagging and publishing are separate maintainer steps.
@@ -83,10 +117,46 @@ node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
 ### Create a changelog
 
 ```bash
+# Initialize a starter CHANGELOG.md in current directory:
+node bin/changelog-guard.js init
+
+# Or create at a specific path (parent directory must exist):
 node bin/changelog-guard.js init docs/CHANGELOG.md
 ```
 
-The parent directory must already exist. `init` refuses to overwrite an existing file.
+Expected output:
+
+```text
+Created starter changelog at CHANGELOG.md
+```
+
+`init` refuses to overwrite an existing file.
+
+### Integration examples (npm scripts & Git hooks)
+
+Add changelog checks to your project's `package.json`:
+
+```json
+{
+  "scripts": {
+    "lint:changelog": "changelog-guard lint",
+    "check-pr": "changelog-guard check-pr --base origin/main",
+    "version": "changelog-guard release $npm_package_version && git add CHANGELOG.md"
+  }
+}
+```
+
+Or configure a pre-commit hook (e.g. using Husky or Git hook in `.git/hooks/pre-commit`):
+
+```bash
+#!/bin/sh
+node bin/changelog-guard.js lint
+```
+
+Explore additional starter templates and workflows in the [examples](examples/) folder:
+- [examples/sample-CHANGELOG.md](examples/sample-CHANGELOG.md): Complete Keep a Changelog 1.1 file showing all standard change types (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+- [examples/github-actions/changelog.yml](examples/github-actions/changelog.yml): Standalone GitHub Actions workflow for PRs and pushes.
+- [examples/package-scripts.json](examples/package-scripts.json): Ready-to-copy package script definitions.
 
 ### GitHub Action
 

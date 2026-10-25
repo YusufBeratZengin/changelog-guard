@@ -88,6 +88,23 @@ describe('cli', () => {
     assert.match(res.stdout, /## \[2\.0\.0\] - 2026-10-22/);
   });
 
+  test('release modifies changelog file when not in dry-run mode', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'changelog-cli-release-'));
+    const targetFile = path.join(tmpDir, 'CHANGELOG.md');
+    const validFile = path.resolve(__dirname, 'fixtures/valid-changelog.md');
+    fs.copyFileSync(validFile, targetFile);
+
+    try {
+      const res = runCli(['release', '2.0.0', '--file', targetFile, '--date', '2026-10-22']);
+      assert.equal(res.status, 0);
+      assert.match(res.stdout, /Released version \[2\.0\.0\] \(2026-10-22\) in/);
+      const updated = fs.readFileSync(targetFile, 'utf8');
+      assert.match(updated, /## \[2\.0\.0\] - 2026-10-22/);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   test('help aliases work and unknown commands fail with usage', () => {
     for (const args of [[], ['-h']]) {
       const result = runCli(args);

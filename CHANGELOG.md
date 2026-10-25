@@ -8,10 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Reference example changelog (`examples/sample-CHANGELOG.md`), GitHub Actions workflow example, and npm scripts/pre-commit integration examples.
+- Dedicated unit test suite for Git helper utilities and CLI edge-case test coverage.
+- GitHub issue template configuration file (`.github/ISSUE_TEMPLATE/config.yml`) with security advisory and documentation links.
 - Reproducible terminal SVG demo and English/Turkish quick starts, configuration, and FAQ.
 - Built-in Node.js test coverage reporting and regression tests for validation edge cases.
 - Weekly Dependabot updates, CodeQL scanning, and issue and pull request templates.
 - Read-only demo verification and an enforced 85% source line coverage floor in the Node.js 22/24 CI matrix.
+
+### Changed
+- Group Dependabot version updates monthly for GitHub Actions and npm ecosystems.
+
+### Fixed
+- Detect changed user-facing files with non-ASCII or international characters in `check-pr`.
+- Reject impossible calendar dates (such as non-leap year February 29) during release preparation and tolerate UTF-8 BOM in changelogs.
 
 ## [0.1.0] - 2026-10-23
 

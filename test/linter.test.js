@@ -99,4 +99,12 @@ describe('linter', () => {
     const lenientResult = lintChangelog(content, { requireUnreleased: false });
     assert.equal(lenientResult.valid, true);
   });
+
+  test('empty sections rule flags empty released version section', () => {
+    const content = '# Changelog\n\n## [Unreleased]\n- Notes.\n\n## [1.0.0] - 2026-10-23\n\n[Unreleased]: https://example.com/compare/v1.0.0...HEAD\n[1.0.0]: https://example.com/releases/tag/v1.0.0\n';
+    const result = lintChangelog(content);
+    assert.equal(result.valid, false);
+    const emptyErrors = result.diagnostics.filter(d => d.rule === 'empty-section' && /Version section "1\.0\.0" is empty/.test(d.message));
+    assert.equal(emptyErrors.length, 1);
+  });
 });

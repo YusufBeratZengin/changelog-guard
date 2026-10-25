@@ -98,6 +98,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
+  test('releaseFile throws if changelog file does not exist', () => {
+    assert.throws(() => {
+      releaseFile('nonexistent-changelog-path.md', '1.0.0');
+    }, /Changelog file not found at/);
+  });
+
   test('preserves CRLF line endings', () => {
     const crlfContent = sampleChangelog.replace(/\n/g, '\r\n');
     const res = executeRelease(crlfContent, '1.1.0', { date: '2026-10-22' });

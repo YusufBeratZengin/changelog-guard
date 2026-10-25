@@ -45,10 +45,16 @@ Aşağıdaki komutları depo kökünde çalıştırın. Tüm seçenekler için `
 
 ```bash
 node bin/changelog-guard.js lint
-node bin/changelog-guard.js lint docs/CHANGELOG.md
+node bin/changelog-guard.js lint examples/sample-CHANGELOG.md
 node bin/changelog-guard.js lint --allow-empty-unreleased
 node bin/changelog-guard.js lint --no-require-unreleased
 node bin/changelog-guard.js lint --check-orphans
+```
+
+Geçerli olduğunda beklenen çıktı:
+
+```text
+CHANGELOG is valid. No issues found in CHANGELOG.md
 ```
 
 Demoyu, bilerek hatalı hazırlanmış test dosyasıyla tekrar üretebilirsiniz. Bu komut **1** çıkış koduyla sonlanır; `non-iso-date` hatasını satır ve sütun bilgisiyle verir:
@@ -68,14 +74,42 @@ node bin/changelog-guard.js check-pr --base origin/main
 node bin/changelog-guard.js check-pr --base origin/main --head HEAD --user-facing "src/**,lib/**,packages/**" --ignore "**/*.test.js,**/*.spec.ts"
 ```
 
-Bilinçli bir istisna için commit mesajının gövdesine `Changelog: skip`, mesajın içine `[skip changelog]` gibi bir işaret veya çekme isteğine yapılandırılmış bir etiket ekleyin. GitHub olay verisindeki etiketler otomatik okunur; Actions dışında `--labels no-changelog` kullanabilirsiniz.
+Kullanıcıyı etkileyen bir değişiklik olmadığında beklenen çıktı:
+
+```text
+[changelog-guard] PASSED: No user-facing files were modified.
+```
+
+Changelog maddesi eklendiğinde beklenen çıktı:
+
+```text
+[changelog-guard] PASSED: Changelog check passed: 1 entry/entries added to [Unreleased].
+```
+
+Bilinçli bir istisna için commit mesajının gövdesine `Changelog: skip`, mesajın içine `[skip changelog]` gibi bir işaret veya çekme isteğine yapılandırılmış bir etiket ekleyin:
+
+```text
+[changelog-guard] Found commit trailer "Changelog: skip"
+```
+
+GitHub olay verisindeki etiketler otomatik okunur; Actions dışında `--labels no-changelog` kullanabilirsiniz.
 
 ### Sürüm hazırlama
 
-Önce sonucu önizleyin; dosyaya yazmak için `--dry-run` seçeneğini kaldırın:
+Önce `--dry-run` ile önizleyin; güncellenmiş dosyayı diske yazmak için `--dry-run` seçeneğini kaldırın:
 
 ```bash
+# Değişiklikleri önizleme (dry-run):
 node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
+
+# Değişiklikleri dosyaya uygulama:
+node bin/changelog-guard.js release 0.2.0 --date 2026-10-23
+```
+
+Dosyaya yazıldığında beklenen çıktı:
+
+```text
+Released version [0.2.0] (2026-10-23) in CHANGELOG.md
 ```
 
 `release`, `[Unreleased]` maddelerini tarihli sürüm başlığına taşır ve karşılaştırma bağlantılarını günceller. Yalnızca changelog dosyasını düzenler; etiketleme ve paket yayımlama bakımcının ayrı adımlarıdır.
@@ -83,10 +117,46 @@ node bin/changelog-guard.js release 0.2.0 --date 2026-10-23 --dry-run
 ### Changelog oluşturma
 
 ```bash
+# Geçerli dizinde başlangıç CHANGELOG.md dosyası oluşturma:
+node bin/changelog-guard.js init
+
+# Ya da belirli bir yolda oluşturma (üst dizin önceden bulunmalıdır):
 node bin/changelog-guard.js init docs/CHANGELOG.md
 ```
 
-Üst dizin önceden bulunmalıdır. `init`, mevcut dosyanın üzerine yazmaz.
+Beklenen çıktı:
+
+```text
+Created starter changelog at CHANGELOG.md
+```
+
+`init`, mevcut dosyanın üzerine yazmaz.
+
+### Entegrasyon örnekleri (npm komutları & Git kancaları)
+
+Projenizin `package.json` dosyasına changelog denetimlerini ekleyin:
+
+```json
+{
+  "scripts": {
+    "lint:changelog": "changelog-guard lint",
+    "check-pr": "changelog-guard check-pr --base origin/main",
+    "version": "changelog-guard release $npm_package_version && git add CHANGELOG.md"
+  }
+}
+```
+
+Veya bir pre-commit kancası (Husky veya `.git/hooks/pre-commit`) yapılandırın:
+
+```bash
+#!/bin/sh
+node bin/changelog-guard.js lint
+```
+
+[examples](examples/) klasöründeki ek başlangıç şablonlarına ve iş akışlarına göz atın:
+- [examples/sample-CHANGELOG.md](examples/sample-CHANGELOG.md): Tüm standart değişiklik türlerini (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`) gösteren eksiksiz Keep a Changelog 1.1 dosyası.
+- [examples/github-actions/changelog.yml](examples/github-actions/changelog.yml): PR'lar ve push olayları için bağımsız GitHub Actions iş akışı.
+- [examples/package-scripts.json](examples/package-scripts.json): Kopyalanıp kullanılabilecek örnek package.json script tanımları.
 
 ### GitHub Action
 

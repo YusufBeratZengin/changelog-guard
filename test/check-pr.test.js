@@ -259,4 +259,26 @@ describe('check-pr with non-ASCII paths', () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test('reads changelog from git head when file is not present on disk in working tree', async () => {
+    const dir = createTestRepo();
+    try {
+      git(['checkout', '-b', 'feature-head-only'], dir);
+      fs.writeFileSync(path.join(dir, 'src', 'index.js'), 'export const val = 42;\n', 'utf8');
+      const changelogPath = path.join(dir, 'CHANGELOG.md');
+      const newChangelog = `# Changelog\n\n## [Unreleased]\n\n### Added\n- Added index export.\n\n[Unreleased]: https://github.com/YusufBeratZengin/changelog-guard/tree/HEAD\n`;
+      fs.writeFileSync(changelogPath, newChangelog, 'utf8');
+      git(['add', '.'], dir);
+      git(['commit', '-m', 'feat: update index with changelog'], dir);
+
+      // Remove changelog from working tree (disk)
+      fs.unlinkSync(changelogPath);
+
+      const result = await checkPullRequest({ base: 'main', head: 'HEAD', cwd: dir });
+      assert.equal(result.ok, true);
+      assert.match(result.message, /Changelog check passed/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
